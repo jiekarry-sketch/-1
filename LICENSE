@@ -1,201 +1,1099 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+A8254 EQU 06C0H
+B8254 EQU 06C2H
+C8254 EQU 06C4H
+CON8254 EQU 06C6H
+A8255 EQU 0600H
+B8255 EQU 0602H
+C8255 EQU 0604H
+CON8255 EQU 0606H
+DATA SEGMENT
+	count DB 00H
+	hour DB 17H
+	min  DB  3BH
+	sec  DB 3BH
+	Chour DB 01H
+	Cmin DB 01H
+	SELSONG DB 01H
+	Csec  DB 00H
+	Shour DB 00H
+	Smin DB 00H
+	Ssec DB 00H
+	alarm_stop_flag DB 00H
+    tsec DB 00H
+	tmin DB 00H
+	thour DB 00H
+    
+	buffer db 6 DUP(?)
+	DTABLE DB 3FH,06H,5BH,4FH,66H,6DH,7DH,07H,7FH,6FH
+	DPTABLE DB 0BFH,86H,0DBH,0CFH,0E6H,0EDH,0FDH,87H,0FFH,0EFH
+	KNFR_LIST  DW  495,467,416,624      ;柯南    频率表
+           DW  495,416,467,661,624,556
+           DW  495,556,495,556,624,495,467,467,556,495,467
+           DW  495,416,624,495,556,833,742,661,624,556,624
+           DW 580,624,990,833,772,833,990,935,833,742,742
+			DW 833,495,556,556,495,556,624,495,556,624,661
+			DW 624,556,833,742,661,742,833,935,0
+	KNTI_LIST  DB  2,2,4,8     ;柯南    时间表
+     	   DB  2,2,4,4,2,4
+     	   DB  2,2,2,2,4,2,2,4,4,2,6
+     	   DB  4,4,4,4,4,4,4,4,2,2,12
+     	   DB  2,2,4,4,4,2,2,2,4,4,8
+			DB 4,2,2,2,2,2,12,2,2,2,4
+			DB 2,10,4,2,2,2,4,20
+     TWTIG_LIST DW 330,371,416,330  ;两只老虎  频率表 
+     			DW 330,371,416,330
+     			DW 416,441,495
+     			DW 416,441,495
+     			DW 495,556,495,441,416,330
+     			DW 495,556,495,441,416,330
+     			DW 330,248,330
+     			DW 330,248,330,0
+     TWTIG_TIME DB 4,4,4,4          ;两只老虎   时间表 
+     			DB 4,4,4,4
+     			DB 4,4,8
+     			DB 4,4,8
+     			DB 2,2,2,2,4,4
+     			DB 2,2,2,2,4,4
+     			DB 4,4,8
+     			DB 4,4,8
+	DJTCFR_LIST DW  371,495,495,495,624,556,495,556,624      ;友谊地久天长    频率表
+           DW  495,495,624,742,833,833,833,742,624
+     	   DW  624,495,556,495,556,624,495,416,416,371
+     	   DW  495,833,742,624,624,495,556,495,556,833
+     	   DW  742,624,624,742,833,990,742,624,624,495
+           DW  556,495,556,624,495,416,416,371,495,0
+	DJTCTI_TIME DB    4,  6,  2,  4,  4,  6,  2,  4,  4      ;友谊地久天长    时间表
+     	   DB    6,  2,  4,  4, 12,  1,  3,  6,  2
+     	   DB    4,  4,  6,  2,  4,  4,  6,  2,  4,  4
+     	   DB   12,  4,  6,  2,  4,  4,  6,  2,  4,  4
+           DB    6,  2,  4,  4, 12,  4,  6,  2,  4,  4
+     	   DB    6,  2,  4,  4,  6,  2,  4,  4,  12
+	YJMFR_LIST DW  782,935,1040,1248,1112,1040,935,782,935,782  ;一剪梅   频率表 
+			DW 520,624,700,782,700,624,700,624,580,520
+			DW 520,782,700,624,580,624,580,520,467,520,0
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+	YJMTI_TIME DB  1,1,12,1,1,1,1,1,1,12                        ;一剪梅   时间表 
+		DB 1,1,12,1,1,1,1,1,1,12
+		DB 2,6,1,1,2,2,2,1,1,12
 
-   1. Definitions.
+	FREQ_LIST1 DW 494,587,523,494,440,587
+         DW 523,494,440,440
+         DW 392,349,349,392,330
+         DW 0FFFFH,330
+         DW 330,330,330,659,587,659
+         DW 0FFFFH,0FFFFH,523
+        DW 494,494,494,523,523
+         DW 0FFFFH,523
+         DW 587,523,494,440,587
+         DW 523,494,440,440
+         DW 392,349,349,392,330
+         DW 0FFFFH,330
+         DW 330,330,330,659,587,659
+         DW 0FFFFH,0FFFFH,523
+         DW 494,494,494,523,523
+         DW 0FFFFH,0FFFFH
+        DW 0
+     TIME_LIST1 DB 3, 6, 3, 3, 6, 6
+           DB 6, 6, 6, 3
+           DB 9, 3, 6, 3, 12
+		   DB 12, 3
+		   DB 6, 3, 6, 3, 3, 3
+		   DB 12, 9, 3
+		   DB 6, 3, 6, 3, 15
+		   DB 12, 3
+		   DB 6, 6, 3, 6, 6
+		   DB 6, 6, 6, 3
+		   DB 9, 3, 6, 3, 12
+		   DB 36, 9
+		   DB 18, 9, 18, 9, 9, 9
+		   DB 12, 9, 3
+		   DB 6, 3, 6, 3, 15
+		   DB 12, 3
+    FRFR_LIST DW KNFR_LIST,TWTIG_LIST,DJTCFR_LIST,YJMFR_LIST
+	TITI_LIST DW KNTI_LIST,TWTIG_TIME,DJTCTI_TIME,YJMTI_TIME
+	SFREQ DW ?
+	STIME DW ?
+     
+DATA ENDS
+SSTACK SEGMENT
+   DW 32 DUP(?)
+SSTACK ENDS
+CODE SEGMENT
+	ASSUME CS:CODE,DS:DATA,SS:SSTACK
+START:
+	MOV AX,DATA
+	MOV DS,AX
+	PUSH DS
+	CALL INIT8259A
+	POP DS
+	CALL INIT8254
+	CALL INIT8255
+MAIN:
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+	CALL DISPLAY1
+	CALL C8255SETCLOCK
+	CALL C8255STOPTIME
+	CALL C8255DELTIME 
+	CALL C8255SCONSECOND
+	CALL ISCLOCK
+	CALL ISTIME
+	JMP MAIN
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+INIT8259A PROC    ;初始化8259A
+	MOV AX,0000H
+	MOV DS,AX
+	MOV AX,OFFSET MIR7
+	MOV SI,003CH
+	MOV [SI],AX
+	MOV AX,SEG MIR7
+	MOV [SI+2],AX
+	;填入MIR6中断程序入口地址
+	MOV SI,0038H
+	MOV AX,OFFSET MIR6
+	;MOV AX,OFFSET SIR1
+	MOV [SI],AX
+	MOV AX,SEG MIR6
+	;MOV AX,SEG SIR1
+	MOV [SI+2],AX
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+	CLI
+	MOV AL,11H  ;ICW1
+	OUT 20H,AL
+	MOV AL,08H  ;ICW2
+	OUT 21H,AL
+	MOV AL,04H  ;ICW3
+	OUT 21H,AL
+	MOV AL,01H  ;ICW4
+	OUT 21H,AL
+	;初始从片8259
+	MOV AL, 11H
+    OUT 0A0H, AL            ;ICW1
+    MOV AL, 30H
+    OUT 0A1H, AL            ;ICW2
+    MOV AL, 02H                
+    OUT 0A1H, AL            ;ICW3
+    MOV AL, 03H
+    OUT 0A1H, AL            ;ICW4
+    MOV AL, 0FDH
+    OUT 0A1H,AL                ;OCW1
+    MOV AL,28H
+    OUT 21H,AL        ;主8259 OCW1
+    MOV AL,0E6H      
+    OUT 20H,AL       ;主8259 OCW2
+	STI
+	RET
+INIT8259A ENDP
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+INIT8254 PROC    ;初始化8254
+	MOV DX,CON8254
+	MOV AL,36H
+	OUT DX,AL
+	MOV AX,4E20H
+	MOV DX,A8254
+	OUT DX,AL
+	MOV AL,AH
+	OUT DX,AL
+	RET
+INIT8254 ENDP 
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+INIT8255 PROC
+	MOV DX,CON8255
+	MOV AL,89H
+	OUT DX,AL
+	RET 
+INIT8255 ENDP
+;8254每20ms给IR7一个中断 
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+MIR7:
+	STI
+	INC count
+	CMP count,3CH           ;中断次数达50次 
+	JNZ EXIT
+	CALL ADCLOCK
+	CALL ADCLOCK2
+	MOV count,00H
+EXIT:
+	MOV AL,20H
+	OUT 20H,AL
+	IRET
+	
+;mir6中断设置当前时间
+MIR6:
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	CALL SETNUM   ;从键盘获取数字存放输入缓冲区 
+	LEA DI,hour
+	MOV SI,3005H
+	MOV CX,03H
+;键盘输入的6个数转化为时分秒,高位乘10加低位 
+LOOPMIR6:
+	MOV AL,[SI]
+	MOV BL,0AH
+	MUL BL
+	MOV AH,[SI-1]
+	ADD AL,AH
+	MOV [DI],AL
+	SUB SI,02H
+	INC DI
+	LOOP LOOPMIR6
+	MOV AL,20H
+	OUT 20H,AL
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	IRET	
+;8255检测闹钟并设置闹钟,设置闹钟时间及闹铃曲目	
+C8255SETCLOCK PROC
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	MOV DX,C8255
+	IN AL,DX
+	TEST AL,80H
+	JZ SETOUT
+RESETCLK1:
+	CALL SETNUM
+	LEA DI,Chour
+	MOV SI,3005H
+	MOV CX,03H
+LOOPSIR11:
+	MOV AL,[SI]
+	MOV BL,0AH
+	MUL BL
+	MOV AH,[SI-1]
+	ADD AL,AH
+	MOV [DI],AL
+	SUB SI,02H
+	INC DI
+	LOOP LOOPSIR11
+	;判断输入闹钟是否合法,否则重新设置,时小于24,分小于60,选择曲目高位小于4 
+	CMP Chour,17H 
+	JNG CPCMIN1
+	MOV SI,3005H
+	JMP RESETCLK1
+CPCMIN1:
+	CMP Cmin,3BH
+	JNG SECSONG
+	MOV SI,3005H
+	JMP RESETCLK1
+SECSONG:
+	CMP SELSONG,04H
+	JNG SETOUT
+	MOV SI,3005H
+	JMP RESETCLK1
+SETOUT:
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET
+C8255SETCLOCK ENDP
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+;8255检测删除键，删除闹钟
+C8255DELTIME PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    MOV DX,C8255
+    IN AL,DX
+    TEST AL,20H
+    JZ SETOUT1
+    
+LOP1:
+    CALL DISPLAY1
+    MOV Chour,00H
+    MOV Cmin,00H
+	MOV DX,C8255
+    IN AL,DX
+	TEST AL,20H
+	JNZ LOP1
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+SETOUT1:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+C8255DELTIME ENDP
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+;8255检测暂停键，停止计时
+C8255STOPTIME PROC
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	MOV DX,C8255
+	IN AL,DX
+	TEST AL,40H
+	JZ SEETOUT
+	CLI
+LOP:
+	CALL DISPLAY1
+	IN AL,DX
+	TEST AL,40H
+	JNZ LOP
+	STI
+SEETOUT:
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET
+C8255STOPTIME ENDP
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+;8255检测到秒表键，开始秒表计时
+C8255SCONSECOND PROC
+   PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	MOV DX,C8255
+	IN AL,DX
+	TEST AL,10H
+	JZ SEEETOUT
+	MOV SSEC,00H
+    MOV SMIN ,00H
+    MOV SHOUR ,00H
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+    ;不执行CALL DISPALY2,不显示时间
+   
+   LOOP3:
+    CALL DISPLAY2
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+    IN AL,DX 
+    TEST AL,40H
+    JZ K
+    mov cl,ssec
+    mov tsec,cl
+    mov cl,smin
+    mov tmin,cl
+    mov cl,shour
+    mov thour,cl
+STOP:
+    mov cl,tsec
+    mov ssec,cl
+    mov cl,tmin
+    mov smin,cl
+    mov cl,thour
+    mov shour,cl
+    CALL DISPLAY2
+    IN AL,DX
+    TEST AL,40H
+    JNZ STOP
+K:
+	IN AL,DX
+	TEST AL,10H
+	JNZ LOOP3
+SEEETOUT:
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET
+C8255SCONSECOND ENDP
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+ADCLOCK2 PROC
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
+	CMP ssec,3BH
+	JZ A11
+	INC ssec
+	JMP OVER1
+A11:
+	MOV ssec,00H
+	CMP smin,3BH
+	JZ A21
+	INC smin
+	JMP OVER1
+A21:
+   MOV smin,00H
+   ;INC shour
+   CMP shour,17H
+   JZ A31
+   INC shour
+   JMP OVER
+A31:
+	MOV shour,00H
+	JMP OVER1
+OVER1:
+	RET
+ADCLOCK2 ENDP
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
+   
+;调整时间 中断满50次实现秒增一	
+ADCLOCK PROC
+	CMP sec,3BH
+	JZ A1
+	INC sec
+	JMP OVER
+A1:
+	MOV sec,00H
+	CMP min,3BH
+	JZ A2
+	INC min
+	JMP OVER
+A2:
+   MOV min,00H
+   ;INC hour
+   CMP hour,17H
+   JZ A3
+   INC hour
+   JMP OVER
+A3:
+	MOV hour,00H
+	JMP OVER
+OVER:
+	RET
+ADCLOCK ENDP
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
 
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
 
-   END OF TERMS AND CONDITIONS
 
-   APPENDIX: How to apply the Apache License to your work.
+;显示当前时间	
+DISPLAY2 PROC
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	;判断输入数字是否合法 Shour小于24 Smin Ssec小于60
+	CMP shour,17H
+	JNG CPMIN
+	MOV shour,00H
+CPMIN:
+	CMP MIN,3BH
+	JNG CPSEC
+	MOV smin,00H
+CPSEC:
+	CMP ssec,3BH
+	JNG CPOVER
+	MOV ssec,00H
+CPOVER:
+	LEA SI,buffer
+	LEA DI,shour
+	MOV CX,02H
+;时分秒转换为6个数字存放输出缓冲区buffer 
+LOOP11:
+	LEA BX,DTABLE
+	MOV AL,[DI]
+	CBW
+	XOR AH,AH
+	MOV DL,0AH
+	DIV DL     ;获取Shour Smin高位
+	XLAT       ;获取高位字形码 
+	MOV [SI],AL
+	INC SI
+	LEA BX,DPTABLE
+	MOV AL,AH    ;获取hour min低位
+	XLAT         ;获取低位字形码 
+	MOV [SI],AL
+	INC SI
+	INC DI
+	LOOP LOOP11
+	LEA BX,DTABLE
+	MOV AL,[DI]
+	CBW
+	XOR AH,AH
+	DIV DL
+	XLAT
+	MOV [SI],AL
+	INC SI
+	MOV AL,AH
+	XLAT
+	MOV [SI],AL
+;显示时钟,一次选中一个数码管,输出8位字形码 
+	MOV CX,06H
+	MOV SI,OFFSET buffer
+	MOV BL,0FEH   ;1111 1110 选中第一个数码管 
+LOOP21:
+	MOV AL,BL
+	MOV DX,A8255
+	OUT DX,AL
+	MOV DX,B8255
+	MOV AL,[SI]
+	OUT DX,AL
+	CALL DELAY
+	ROL BL,1     ;选中下一个数码管 
+	INC SI
+	LOOP LOOP21
+	
 
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
+	
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET 
+DISPLAY2 ENDP
 
-   Copyright [yyyy] [name of copyright owner]
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+;显示当前时间	
+DISPLAY1 PROC
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	;判断输入数字是否合法 hour小于24 min sec小于60
+	CMP hour,17H
+	JNG CPMIN1
+	MOV hour,00H
+CPMIN1:
+	CMP MIN,3BH
+	JNG CPSEC1
+	MOV min,00H
+CPSEC1:
+	CMP sec,3BH
+	JNG CPOVER1
+	MOV sec,00H
+CPOVER1:
+	LEA SI,buffer
+	LEA DI,hour
+	MOV CX,02H
+;时分秒转换为6个数字存放输出缓冲区buffer 
+LOOP1:
+	LEA BX,DTABLE
+	MOV AL,[DI]
+	CBW
+	XOR AH,AH
+	MOV DL,0AH
+	DIV DL     ;获取hour min高位
+	XLAT       ;获取高位字形码 
+	MOV [SI],AL
+	INC SI
+	LEA BX,DPTABLE
+	MOV AL,AH    ;获取hour min低位
+	XLAT         ;获取低位字形码 
+	MOV [SI],AL
+	INC SI
+	INC DI
+	LOOP LOOP1
+	LEA BX,DTABLE
+	MOV AL,[DI]
+	CBW
+	XOR AH,AH
+	DIV DL
+	XLAT
+	MOV [SI],AL
+	INC SI
+	MOV AL,AH
+	XLAT
+	MOV [SI],AL
+;显示时钟,一次选中一个数码管,输出8位字形码 
+	MOV CX,06H
+	MOV SI,OFFSET buffer
+	MOV BL,0FEH   ;1111 1110 选中第一个数码管 
+LOOP22:
+	MOV AL,BL
+	MOV DX,A8255
+	OUT DX,AL
+	MOV DX,B8255
+	MOV AL,[SI]
+	OUT DX,AL
+	CALL DELAY
+	ROL BL,1     ;选中下一个数码管 
+	INC SI
+	LOOP LOOP22
+	
+	
+	
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET 
+DISPLAY1 ENDP
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+DELAY PROC
+   PUSH CX
+	MOV CX,02F0H
+DELAY1:
+	PUSH AX
+	POP AX
+	LOOP DELAY1
+	POP CX
+	RET
+DELAY ENDP
+;判断响铃时刻 
+ISCLOCK PROC
+    PUSH AX
+    MOV AL,alarm_stop_flag    ; 检查闹钟是否已手动停止
+    CMP AL,01H
+    JZ ISOVER_STOPPED         ; 如果已停止，跳过响铃
+    
+    MOV AL,hour
+    CMP AL,Chour
+    JNZ ISOVER
+    MOV AL,min
+    CMP AL,Cmin
+    JNZ ISOVER
+    MOV AL,sec
+    CMP AL,Csec
+    JNZ ISOVER
+    
+    ; 重置停止标志
+    MOV alarm_stop_flag,00H
+    CALL BELL
+    JMP ISOVER
+
+ISOVER_STOPPED:
+    ; 如果闹钟已停止，检查是否到达下一个闹钟时间
+    ; 这里可以根据需要添加逻辑
+    MOV alarm_stop_flag,00H   ; 重置标志
+
+ISOVER:
+    POP AX
+    RET 
+ISCLOCK ENDP
+;判断整点时刻 
+ISTIME PROC
+		CMP sec,00H
+		JZ ISMIN
+		JMP JUDGEOVER
+ISMIN:
+		CMP min,00H
+		JZ ALARM
+		JMP JUDGEOVER
+ALARM:
+		MOV DX,CON8254
+		MOV AL,76H
+		OUT DX,AL
+ALRLOOP:
+		CALL DISPLAY1
+		MOV DX,B8254
+		MOV AL,00H
+		OUT DX,AL
+		MOV AL,09H
+		OUT DX,AL
+		MOV AL,sec
+		CMP AL,02H
+		JE JUDGEOVER
+		JMP ALRLOOP
+JUDGEOVER:
+		MOV DX,B8254
+		MOV AL,0FFH
+		OUT DX,AL
+		MOV AL,0FFH
+		OUT DX,AL
+		MOV DX,CON8254
+		MOV AL,70H
+		OUT DX,AL
+		RET
+ISTIME ENDP 
+
+;从键盘获取数字存放输入缓冲区 		
+SETNUM PROC    
+		MOV AX,DATA
+		MOV DS,AX
+ 		MOV SI,3000H
+		MOV AL,00H
+		MOV [SI],AL				;清显示缓冲
+		MOV [SI+1],AL
+		MOV [SI+2],AL
+		MOV [SI+3],AL
+		MOV [SI+4],AL
+		MOV [SI+5],AL
+		MOV DI,3005H
+        MOV DX,CON8255		;写8255控制字
+        MOV AL,89H
+		OUT DX,AL
+BEGIN:  CALL DIS				;调用显示子程序
+		CALL CLEAR				;清屏
+		CALL CCSCAN				;扫描
+		JNZ INK1
+		JMP BEGIN
+INK1:   CALL DIS
+        CALL DALLY
+        CALL DALLY
+        CALL CLEAR
+		CALL CCSCAN
+		JNZ INK2				;有键按下，转到INK2
+		JMP BEGIN
+
+;确定按下键的位置
+INK2:   MOV CH,0FEH
+		MOV CL,00H
+
+COLUM:  MOV AL,CH
+        MOV DX,A8255
+		OUT DX,AL
+        MOV DX,C8255 
+		IN AL,DX
+
+L1:     TEST AL,01H         ;is L1?
+        JNZ L2
+
+        MOV AL,07H          ;L1
+		JMP KCODE
+
+L2:     TEST AL,02H         ;is L2?
+        JNZ L3
+
+        MOV AL,04H          ;L2
+        JMP KCODE
+
+L3:     TEST AL,04H         ;is L3?
+        JNZ L4
+
+        MOV AL,01H          ;L3
+		JMP KCODE
+
+L4:     TEST AL,08H         ;is L4?
+        JNZ NEXT
+
+        MOV AL,00H          ;L4
+		MOV CL,0
+KCODE:  ADD AL,CL
+		MOV [DI],AL
+		DEC DI
+		CMP DI,2FFFH
+		JNZ KON1
+		CALL DIS
+		PUSH CX
+		MOV CX,0040H
+LOOPDALLY:
+		CALL DALLY
+		LOOP LOOPDALLY
+		POP CX
+		RET
+KON1:	PUSH AX
+KON:    CALL DIS
+		CALL CLEAR
+		CALL CCSCAN
+		JNZ KON
+		POP AX
+
+NEXT:   INC CL
+		MOV AL,CH
+		TEST AL,08H
+		JZ KERR
+		ROL AL,1
+		MOV CH,AL
+		JMP COLUM
+KERR:   JMP BEGIN
+		RET
+SETNUM ENDP
+
+CCSCAN: MOV AL,00H
+        MOV DX,A8255  
+		OUT DX,AL
+        MOV DX,C8255
+        IN  AL,DX
+		NOT AL
+        AND AL,0FH
+		RET
+
+;清屏子程序
+CLEAR:  MOV DX,B8255
+        MOV AL,00H
+        OUT DX,AL
+		RET
+
+;显示子程序
+DIS:    PUSH AX
+		MOV SI,3000H
+		MOV DL,0DFH
+		MOV AL,DL
+AGAIN:  PUSH DX
+        MOV DX,A8255 
+        OUT DX,AL
+        MOV AL,[SI]
+        MOV BX,OFFSET DTABLE
+		AND AX,00FFH
+		ADD BX,AX
+		MOV AL,[BX]
+        MOV DX,B8255
+		OUT DX,AL
+		CALL DALLY
+		INC SI
+        POP DX
+        MOV AL,DL
+		TEST AL,01H
+        JZ  OUT1
+		ROR AL,1
+		MOV DL,AL
+		JMP AGAIN
+OUT1:   POP AX
+		RET
+;延时子程序		
+DALLY:  PUSH CX
+        MOV CX,0006H
+T1:     MOV AX,009FH
+T2:     DEC AX
+		JNZ T2
+		LOOP T1
+		POP CX
+		RET
+BELL PROC
+    ; 保存寄存器
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    PUSH SI
+    PUSH DI
+    PUSH BP
+    
+    ; 设置8255控制数码管
+    MOV DX, A8255
+    MOV AL, 7FH
+    OUT DX, AL
+    
+    ; 初始化8254工作方式
+    MOV DX, CON8254
+    MOV AL, 76H                  ; 定时器1、方式3
+    OUT DX, AL
+    
+    ; 获取曲目信息
+    MOV AL, SELSONG
+    DEC AL                      ; 歌曲编号从1开始，但列表索引从0开始
+    MOV AH, 00H
+    MOV BL, 02H                 ; 每个地址是2字节（WORD）
+    MUL BL                      ; 直接乘以2，不需要除法
+    
+    ; 获取频率表地址
+    LEA SI, FRFR_LIST
+    ADD SI, AX
+    MOV BX, WORD PTR [SI]
+    MOV SFREQ, BX
+    
+    ; 获取时间表地址
+    LEA SI, TITI_LIST
+    ADD SI, AX
+    MOV BX, WORD PTR [SI]
+    MOV STIME, BX
+    
+    MOV CL, 01H                  ; 播放次数
+
+BELLBEGIN:
+    MOV SI, SFREQ               ; 频率表起始地址
+    MOV DI, STIME               ; 时间表起始地址
+
+BELLPLAY:
+    ; 在播放每个音符前检查停止标志和键盘输入
+    CALL CHECK_STOP_KEY
+    MOV AL, alarm_stop_flag
+    CMP AL, 01H
+    JZ BELL_STOPPED             ; 如果按下停止键，立即停止
+    
+    ; 检查是否到达曲末（频率为0表示结束）
+    MOV AX, WORD PTR [SI]
+    CMP AX, 0000H
+    JZ BELLEND
+    
+    ; 设置8254频率
+    MOV DX, 0FH
+    MOV AX, 4240H
+    DIV WORD PTR [SI]          ; 计算计数初值
+    MOV DX, B8254
+    OUT DX, AL
+    MOV AL, AH
+    OUT DX, AL
+    
+    ; 获取播放时间
+    MOV DL, [DI]                ; 获取时间参数
+    
+    ; 播放音符（调用修改后的延时函数，包含键盘检测）
+    PUSH CX
+    PUSH DX
+    PUSH AX
+    PUSH BX
+    PUSH SI
+    PUSH DI
+    PUSH BP
+    CALL BELLDALLY_WITH_KEYCHECK  ; 调用带键盘检测的延时
+    POP BP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    POP DX
+    POP CX
+    
+    ; 检查是否按下停止键
+    MOV AL, alarm_stop_flag
+    CMP AL, 01H
+    JZ BELL_STOPPED
+    
+    ; 准备下一个音符
+    ADD SI, 2
+    INC DI
+    
+    JMP BELLPLAY
+
+BELLEND:
+    DEC CL
+    CMP CL, 0
+    JZ OUTPLAY
+    JMP BELLBEGIN
+
+BELL_STOPPED:
+    ; 用户手动停止闹钟
+    MOV alarm_stop_flag,01H    ; 设置停止标志
+
+OUTPLAY:
+    ; 停止音乐输出
+    MOV DX, B8254
+    MOV AL, 0FFH
+    OUT DX, AL
+    MOV AL, 0FFH
+    OUT DX, AL
+    
+    ; 恢复8254设置
+    MOV DX, CON8254
+    MOV AL, 36H                 ; 恢复原来的工作方式
+    OUT DX, AL
+    
+    ; 恢复寄存器
+    POP BP
+    POP DI
+    POP SI
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+
+CHECK_STOP_KEY:
+    ; 检测键盘是否有键按下
+    PUSH AX
+    PUSH DX
+    
+    ; 先检测所有列是否有键按下
+    MOV DX, A8255
+    MOV AL, 00H               ; 使所有列为低电平
+    OUT DX, AL
+    
+    ; 读取行状态
+    MOV DX, C8255
+    IN AL, DX
+    
+    ; 检查是否有行被拉低（键盘按下）
+    NOT AL                    ; 取反，按下时位为1
+    AND AL, 0FH               ; 只保留低4位
+    JZ NO_STOP_KEY            ; 如果没有键按下，跳转
+    
+    ; 有键按下，延时去抖
+    CALL DELAY
+    CALL DELAY
+    
+    ; 再次检测确认
+    MOV DX, A8255
+    MOV AL, 00H
+    OUT DX, AL
+    MOV DX, C8255
+    IN AL, DX
+    NOT AL
+    AND AL, 0FH
+    JZ NO_STOP_KEY            ; 如果是抖动，跳转
+    
+    ; 检测到键按下，设置停止标志
+    MOV alarm_stop_flag, 01H
+    
+    ; 等待按键释放
+KEY_RELEASE:
+    CALL DELAY
+    MOV DX, A8255
+    MOV AL, 00H
+    OUT DX, AL
+    MOV DX, C8255
+    IN AL, DX
+    NOT AL
+    AND AL, 0FH
+    JNZ KEY_RELEASE           ; 如果键仍然按下，继续等待
+
+NO_STOP_KEY:
+    POP DX
+    POP AX
+    RET
+BELL ENDP
+
+; 新的延时函数，包含键盘检测
+BELLDALLY_WITH_KEYCHECK PROC
+    PUSH CX
+    PUSH DX
+    PUSH AX
+    PUSH BX
+    PUSH SI
+    PUSH DI
+    PUSH BP
+    
+D0: 
+    MOV CX, 0005H              ; 减小外层循环次数
+    
+D1: 
+    ; 在每次循环中都调用显示和键盘检测
+    PUSH CX
+    PUSH DX
+    PUSH AX
+    PUSH BX
+    PUSH SI
+    PUSH DI
+    PUSH BP
+    
+    ; 显示时间
+    CALL DISPLAY1
+    
+    ; 检查停止键
+    CALL CHECK_STOP_KEY
+    MOV AL, alarm_stop_flag
+    CMP AL, 01H
+    JNZ CONTINUE_PLAY          ; 如果没有停止，继续播放
+    
+    ; 如果按下停止键，立即返回
+    POP BP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    POP DX
+    POP CX
+    POP BP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    POP DX
+    POP CX
+    RET
+
+CONTINUE_PLAY:
+    POP BP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    POP DX
+    POP CX
+    
+    ; 短延时
+    MOV AX, 0100H
+D2: DEC AX
+    JNZ D2
+    
+    LOOP D1
+    
+    DEC DL
+    JNZ D0
+    
+    POP BP
+    POP DI
+    POP SI
+    POP BX
+    POP AX
+    POP DX
+    POP CX
+    RET
+BELLDALLY_WITH_KEYCHECK ENDP
+CODE ENDS
+	END START
